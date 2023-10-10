@@ -93,7 +93,6 @@ int main()
 			
 		if (FD_ISSET(serversock, &client_fds)) 
 		{   
-			cout<<'a'<<endl;
 			struct sockaddr_in client_addr;
 			socklen_t client_address_len = sizeof(client_addr);
 			clientsock = accept(serversock, (struct sockaddr*) &client_addr, &client_address_len);
