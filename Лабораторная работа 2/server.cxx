@@ -75,7 +75,7 @@ int main()
 		{
 		int clientsock;
 		fd_set client_fds = server_fds;
-		int Fd = pselect(maxFd, &client_fds, NULL, NULL, &tv, &origMask);
+		int Fd = pselect(maxFd, &client_fds, NULL, NULL, NULL, &origMask);
 		cout<<Fd<<endl;
 		if (Fd==-1)
 			{
