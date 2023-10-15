@@ -12,12 +12,12 @@
 using namespace std;
 
 sigset_t blockedMask, origMask;
-volatile sig_atomic_t wasSigHub = 0;
+volatile sig_atomic_t wasSigHup = 0;
 
 
 void sigHupHandler (int r)
 {
-   wasSigHub = 1;
+   wasSigHup = 1;
 }
 
 void sigRegistrator ()
@@ -35,21 +35,23 @@ void sigBlocking ()
 	sigaddset (&blockedMask, SIGHUP);
 	sigprocmask(SIG_BLOCK, &blockedMask, NULL);
 	sigemptyset (&origMask);
+
 }
 
  
 int main()
 {
 	int serversock = socket(AF_INET, SOCK_STREAM, 0);
-	vector<int> clientsocks;
+	int client, acception;
+	vector<int> clients;
 	
 	
 	char buf[1024];
 	int len;
-	int maxFd = 0;
+	int maxFd, num=1;
 
     struct timespec tv;
-    tv.tv_sec = 5;
+    tv.tv_sec =30;
     tv.tv_nsec = 0;
     
 	
@@ -62,72 +64,97 @@ int main()
 	listen (serversock, 5);
 
 	
-	fd_set server_fds;
-    FD_ZERO (&server_fds);		
-	FD_SET(serversock, &server_fds);
-	maxFd+=2;
-	
 	sigRegistrator();
 	sigBlocking ();
 	
 		
 	while(1)
 		{
-		int clientsock;
-		fd_set client_fds = server_fds;
-		int Fd = pselect(maxFd, &client_fds, NULL, NULL, NULL, &origMask);
-		cout<<Fd<<endl;
+			
+		fd_set server_fds;
+
+        FD_ZERO (&server_fds);		
+		FD_SET(serversock, &server_fds);
+		if (maxFd<serversock) maxFd = serversock + 1; 
+
+		if (num==2) 
+		{
+			FD_SET (client, &server_fds);
+		    if (maxFd<client) {maxFd = client + 1;}}
+		
+		int Fd = pselect(maxFd, &server_fds, NULL, NULL, NULL, &origMask);
+		
 		if (Fd==-1)
 			{
 
 				if (errno == EINTR) 
 				{
-					cout << "signal"<<endl;
-						
-						
+					if (wasSigHup==1) 
+					{
+						cout << "signal"<< endl;
+						close(acception);
+						close(client);
+						close(serversock);
+		            }
+					 	
 				}
 					
-				else {cout<<"error"; break;}
+				else {cout<<"error"; exit(2);}
 			};
-		
 			
-		if (FD_ISSET(serversock, &client_fds)) 
+		
+		
+		if (FD_ISSET(serversock, &server_fds)) 
 		{   
 			struct sockaddr_in client_addr;
 			socklen_t client_address_len = sizeof(client_addr);
-			clientsock = accept(serversock, (struct sockaddr*) &client_addr, &client_address_len);
+			acception = accept(serversock, (struct sockaddr*) &client_addr, &client_address_len);
 			
-			if (clientsock == -1) {
+			if (acception== -1) {
 					perror("accept");
-					exit(EXIT_FAILURE);}
-					
+					exit(EXIT_FAILURE);}	
 			cout<<"new connection"<<endl;
-			maxFd++;
-			if (maxFd>3) {maxFd--; close(clientsock);}
-			else FD_SET(clientsock, &client_fds);
+			num++;
+			
+			
+			if (num<=2)
+			{
+				client = acception;
+				//close (acception);
+				//clients.push_back(acception);
+				/*FD_SET(client, &server_fds);
+				if (maxFd<client) {maxFd = client + 1;}*/
+		    }
+		    else {num--; close(acception);}
+		    
 		}
 		
-	    if (FD_ISSET (clientsock, &client_fds))	
+	    if (FD_ISSET (client, &server_fds))	
 	    {	
-			len = read(clientsock, buf, 1024);			
+			len = read(client, buf, 1024);			
 			if (len<=0) 
 				{
-					
-					close (clientsock);
-                    FD_CLR(clientsock, &client_fds);
-                    maxFd--;
-						
+					close (client);
+                    FD_CLR(client, &server_fds);
+                    clients.pop_back();
+                    num--;
 				};
 				
-				cout<<len<<endl;
+			cout<<len<<endl;
 						
 				//for (int i=0; i<len; i++) cout<<buf[i];
 				
 				//FD_CLR(i, &client_fds);
+			
 		}
-		//if (Fd==0) break;
 		
 		}
+		
+		close (acception);
+		close (client);
+		close (serversock);
+		
+		
 			
       return 0;
     

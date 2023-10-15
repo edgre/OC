@@ -18,7 +18,6 @@ int main()
 	string message;
 
 
-	
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -30,16 +29,20 @@ int main()
 		exit(2);
 	};
 
-
+    /*cin>>message;
+	cout<<message;*/
+	
     while(1)
     {
 	cin>>message;
-	cout<<message;
-	//if (message=="exit") break;
+	cout<<message<<endl;
+	if (message == "exit") 
+	{
+		close(sock); 
+		break;
+	}
 	send(sock, message.c_str(), message.length(), 0);
 	}
-	
-	close(sock); 
 	
 	
 	return 0;	
