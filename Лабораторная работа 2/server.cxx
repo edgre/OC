@@ -69,23 +69,25 @@ int main()
 	
 		
 	while(1)
-		{
+	{
 			
 		fd_set server_fds;
 
         FD_ZERO (&server_fds);		
 		FD_SET(serversock, &server_fds);
+
 		if (maxFd<serversock) maxFd = serversock + 1; 
 
 		if (num==2) 
 		{
 			FD_SET (client, &server_fds);
-		    if (maxFd<client) {maxFd = client + 1;}}
+		    if (maxFd<client) {maxFd = client + 1;}
+		}
 		
 		int Fd = pselect(maxFd, &server_fds, NULL, NULL, NULL, &origMask);
 		
 		if (Fd==-1)
-			{
+		{
 
 				if (errno == EINTR) 
 				{
@@ -100,7 +102,7 @@ int main()
 				}
 					
 				else {cout<<"error"; exit(2);}
-			};
+		};
 			
 		
 		
@@ -110,9 +112,12 @@ int main()
 			socklen_t client_address_len = sizeof(client_addr);
 			acception = accept(serversock, (struct sockaddr*) &client_addr, &client_address_len);
 			
-			if (acception== -1) {
-					perror("accept");
-					exit(EXIT_FAILURE);}	
+			if (acception== -1)
+			{
+				perror("accept");
+				exit(EXIT_FAILURE);
+			}	
+
 			cout<<"new connection"<<endl;
 			num++;
 			
@@ -120,11 +125,8 @@ int main()
 			if (num<=2)
 			{
 				client = acception;
-				//close (acception);
-				//clients.push_back(acception);
-				/*FD_SET(client, &server_fds);
-				if (maxFd<client) {maxFd = client + 1;}*/
 		    }
+
 		    else {num--; close(acception);}
 		    
 		}
@@ -133,30 +135,24 @@ int main()
 	    {	
 			len = read(client, buf, 1024);			
 			if (len<=0) 
-				{
+			{
 					close (client);
                     FD_CLR(client, &server_fds);
                     clients.pop_back();
                     num--;
-				};
+			};
 				
 			cout<<len<<endl;
 						
-				//for (int i=0; i<len; i++) cout<<buf[i];
-				
-				//FD_CLR(i, &client_fds);
 			
 		}
 		
-		}
+	}
 		
-		close (acception);
-		close (client);
-		close (serversock);
-		
-		
-			
-      return 0;
+	close (acception);
+	close (client);
+	close (serversock);
+    return 0;
     
 		
 }

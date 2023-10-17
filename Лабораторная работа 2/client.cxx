@@ -33,15 +33,17 @@ int main()
 	cout<<message;*/
 	
     while(1)
-    {
-	cin>>message;
-	cout<<message<<endl;
-	if (message == "exit") 
 	{
-		close(sock); 
-		break;
-	}
-	send(sock, message.c_str(), message.length(), 0);
+		cin>>message;
+		cout<<message<<endl;
+
+		if (message == "exit") 
+		{
+			close(sock); 
+			break;
+		}
+
+		send(sock, message.c_str(), message.length(), 0);
 	}
 	
 	
