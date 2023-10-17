@@ -28,9 +28,6 @@ int main()
 		perror("connect");
 		exit(2);
 	};
-
-    /*cin>>message;
-	cout<<message;*/
 	
     while(1)
 	{
