@@ -21,7 +21,7 @@ return 0;
 }
 
 num++;
-int len=sprintf(buffer, "%d\n", num);
+int len=sprintf(buffer, "This file has been read %d times \n", num);
 pr_info("procfile read %s\n",
 file_pointer->f_path.dentry->d_name.name);
 finished = 1;
