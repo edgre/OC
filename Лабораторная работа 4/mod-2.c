@@ -14,6 +14,7 @@ struct file *file_pointer, char __user *buffer,
 size_t buffer_length, loff_t* offset)
 {
 static bool finished = 0;
+char s[100];
 if (finished)
 {
 finished=0;
@@ -21,7 +22,8 @@ return 0;
 }
 
 num++;
-int len=sprintf(buffer, "This file has been read %d times \n", num);
+int len=sprintf(s, "This file has been read %d times \n", num);
+copy_to_user(buffer, s, len);
 pr_info("procfile read %s\n",
 file_pointer->f_path.dentry->d_name.name);
 finished = 1;
